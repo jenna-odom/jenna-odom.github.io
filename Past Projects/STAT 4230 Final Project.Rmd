@@ -1,0 +1,330 @@
+---
+title: "STAT 4230 Final Project"
+author: "Connor Bergey, Jenna Odom, Scherasade Lewis"
+date: "2023-07-03"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import and Clean Data
+```{r}
+baseball <- read.csv("baseball.csv")
+baseball <- baseball[,-1]
+table(complete.cases(baseball))
+```
+
+# Variable Names
+```{r}
+#Year = Year
+#WLR = Win Loss Rate (FOR THE BRAVES!!!)
+#RunDiff = Runs For / Runs Against (points scored vs points against)
+#BatAge = Batter Age (avg)
+#PAge = Pitcher Age (avg)
+#BA = Batting Avg (times hit ball and gotten on a plate)
+#OBP = On Base % (BA + walks)
+#SLG = Slugging Percentage (Weight of points)
+#SOdivAB (Strike Out/At Bats)
+#RAdpG (Runs Allowed per Game (accounts for error in field))
+#ERA (Runs Allowed per Game (by pitcher only))
+#SOdivIP (Strike Outs / Innings Pitched)
+#HdivIF (Hits / Innings Pitched)
+```
+
+
+# Load Packages
+```{r}
+library(car);library(DAAG);library(leaps)
+```
+
+# Correlation Matrix
+```{r}
+cor(baseball)
+```
+
+# Fit Initial Model
+```{r}
+baseballModel_0 <- lm(WLR~.,baseball)
+```
+
+# Resolve Multicollinearity
+```{r}
+vif(baseballModel_0) #remove SOdivAB
+baseballModel_0_1 <- lm(WLR~.-SOdivAB,baseball)
+```
+
+```{r}
+vif(baseballModel_0_1) #remove ERA
+baseballModel_0_2 <- lm(WLR~.-SOdivAB-ERA,baseball)
+```
+
+```{r}
+vif(baseballModel_0_2)
+```
+
+```{r}
+baseball <- baseball[,-c(8,10)]
+```
+
+# Divide Data (75% Training, 25% Testing)
+```{r}
+attach(baseball)
+set.seed(100)
+sample_baseball <- sample(c(TRUE,FALSE),nrow(baseball),replace=TRUE,prob=c(.75,.25))
+
+train_baseball <- baseball[sample_baseball,]
+test_baseball <- baseball[!sample_baseball,]
+```
+
+# Creating Models
+
+# [1] Variable Selection with Stepwise Procedure
+```{r}
+baseball_prestepwise <- lm(WLR~1,train_baseball)
+
+baseball_stepwise <- step(baseball_prestepwise,scope=WLR~RunDiff+BatAge+PAge+BA+OBP+SLG+RApG+SOdivIP+HdivIF,data=train_baseball,direction="both")
+
+baseball_1 <- baseball_stepwise
+
+summary(baseball_1) #R^2 = .9137
+```
+
+# [2] Stepwise Deduction with Squared Term
+```{r}
+baseball_2 <- lm(WLR~RunDiff+I(RunDiff^2),train_baseball)
+summary(baseball_2) #R^2 = .9216
+```
+
+# Regsubset Procedure
+```{r}
+baseball_regsubsets <- regsubsets(WLR~.,train_baseball,nvmax=10)
+
+names(summary(baseball_regsubsets))
+```
+
+```{r}
+summary(baseball_regsubsets)
+```
+
+# [3] Regsubsets rsq
+```{r}
+plot(1:9,summary(baseball_regsubsets)$rsq,
+     type="b",
+     col="red",
+     pch=16)
+```
+
+Looking at the rsq values, the model indicates it would be best to use all 9 predictor variables.
+```{r}
+baseball_3 <- lm(WLR~.,train_baseball)
+summary(baseball_3) #R^2 = .9157
+```
+
+
+# [4] Regsubsets adjr2
+```{r}
+plot(1:9,summary(baseball_regsubsets)$adjr2,
+     type="b",
+     col="blue",
+     pch=16)
+```
+
+Looking at the adjr2 values, the model indicates it would be best to use only 1 predictor variable, which is RunDiff. This is will be the same model as baseball_1, so we will not need to create a new variable for this model.
+
+# [5] Regsubsets bic
+```{r}
+plot(1:9,summary(baseball_regsubsets)$bic,
+     type="b",
+     col="green",
+     pch=16)
+```
+
+Looking at the bic values, the model indicates it would be best to use only 1 predictor variable, which is RunDiff. This is will be the same model as baseball_1, so we will not need to create a new variable for this model.
+
+# Checkpoint
+
+We have 3 models to consider using this point forward:
+
+baseball_1, which has one variable, RunDiff, has an $R^2$ of .9137 and Adjusted $R^2$ of 0.9129
+
+baseball_2, which has two variables, RunDiff and RunDiff^2, has an $R^2$ of .9216 and Adjusted $R^2$ of .9201
+
+baseball_3, which has all 9 variables, has an $R^2$ of .9157 and Adjusted $R^2$ of .9082
+
+# ---
+
+Based on these values, we can deduce baseball_3 is the most complex and has the lowest Adjusted $R^2$, indicating it may not be our best model.
+
+baseball_2 is slightly more complex than baseball_1, and has a slightly better Adjusted $R^2$
+
+It isn't clear which of these two models (baseball_1 and baseball_2) may be better, so we should continue using both for the time being.
+
+
+# Checking Conditions for baseball_1
+
+# Linearity_1
+```{r}
+plot(baseball_1,1)
+```
+
+Based on the residual plot, the distribution deviates from a linear path, indicating the linearity condition is not plausible. We should use the box-cox transformation to resolve this issue.
+
+# Box-Cox
+```{r}
+boxCox(baseball_1)
+powerTransform(baseball_1)
+```
+
+```{r}
+baseball_1_boxcox <- lm(WLR^(10/6)~RunDiff,train_baseball)
+plot(baseball_1_boxcox,1)
+```
+
+Based on the residual plot, the distribution follows a fairly linear path, indicating the linearity condition is plausible
+
+# Constant Variance_1
+
+$H_{0}:$ There is constant variance
+
+$H_{a}:$ There is not constant variance
+```{r}
+ncvTest(baseball_1_boxcox)
+```
+
+Since the p-value is .12408 > $\alpha$ = .05, we fail to reject $H_{0}$ and conclude the constant variance condition is plausible
+
+# Normality_1
+
+$H_{0}:$ The residuals are normally distributed
+
+$H_{a}:$ The residuals are not normally distributed
+```{r}
+shapiro.test(baseball_1_boxcox$residuals)
+```
+
+Since the p-value = .136 > $\alpha$ = .05 we fail to reject $H_{0}$ and conclude the residuals are normally distributed.
+
+# Independence_1
+
+$H_{0}:$ The residuals are independent
+
+$H_{a}:$ The residuals are dependent
+```{r}
+durbinWatsonTest(baseball_1_boxcox)
+```
+
+Since the p-value = .304 > $\alpha$ = .05, we fail to reject $H_{0}$ and conclude the independence condition is plausible.
+
+
+# Checking Conditions for baseball_2
+
+# Linearity_2
+```{r}
+plot(baseball_2,1)
+```
+
+Based on the residual plot, the distribution follows a fairly linear path, indicating the linearity condition is plausible.
+
+# Constant Variance_2
+$H_{0}:$ There is constant variance
+
+$H_{a}:$ There is not constant variance
+```{r}
+ncvTest(baseball_2)
+```
+
+Since the p-value is .3029 > $\alpha$ = .05, we fail to reject $H_{0}$ and conclude the constant variance condition is plausible
+
+# Normality_2
+
+$H_{0}:$ The residuals are normally distributed
+
+$H_{a}:$ The residuals are not normally distributed
+```{r}
+shapiro.test(baseball_2$residuals)
+```
+
+Since the p-value = .3962 > $\alpha$ = .05 we fail to reject $H_{0}$ and conclude the residuals are normally distributed.
+
+# Independence_1
+
+$H_{0}:$ The residuals are independent
+
+$H_{a}:$ The residuals are dependent
+```{r}
+durbinWatsonTest(baseball_2)
+```
+
+Since the p-value = .318 > $\alpha$ = .05, we fail to reject $H_{0}$ and conclude the independence condition is plausible.
+
+# Checkpoint
+
+Both models satisfy all 4 conditions.
+
+# Hypothesis Test for baseball_1_boxcox
+
+$H_{0}: \beta_{1} = 0$ (the model is not useful)
+
+$H_{a}: \beta_{1} \neq 0$ (the model is useful)
+```{r}
+summary(baseball_1_boxcox)
+```
+
+Since the p-value = 2.2e-16 < $\alpha$ = .05 we reject $H_{0}$ and conclude the model is useful in predicting Win Loss Rate.
+
+$\beta_{0}:$ Given a RunDiff of 0, the predicted WLR is .06181.
+
+```{r}
+.45608^(6/10)
+```
+
+
+$\beta_{1}:$ For each one increase in RunDiff, the predicted WLR is expected to increase by .4317
+
+$91.37\%$ of the variation in WLR is explained by this model, using RunDiff as the predictor variable.
+
+# Hypothesis Test for baseball_2
+
+$H_{0}: \beta_{1} = \beta_{2} = 0$ (the model is not useful)
+
+$H_{a}:$ At least one $\beta \neq 0$ (the model is useful)
+```{r}
+summary(baseball_2)
+```
+
+Since the p-value = 2.2e-16 < $\alpha$ = .05 we reject $H_{0}$ and conclude the model is useful in predicting Win Loss Rate.
+
+$\beta_{0}:$ Given a RunDiff of 0, the predicted WLR is -.1082.
+
+$\beta_{1}:$ Holding all other variables fixed, for each one increase in RunDiff the predicted WLR is expected to increase by .7674.
+
+$\beta_{2}:$ The shape of the graph is concave down (seeing how $RunDiff^2$ < 0). This means, at higher values of RunDiff, the expected WLR is expected to increase at a slower rate.
+
+$92.16\%$ of the variation in WLR is explained by this model, using RunDiff and RunDiff^2 as the predictor variables.
+
+
+# Making Predictions...
+
+# ...with baseball_1
+```{r}
+sqrt(mean(test_baseball$WLR-predict(baseball_1_boxcox,test_baseball))^2)
+```
+
+Mean Square Error for baseball_1_boxcox = .1712
+
+# ...with baseball_2
+```{r}
+sqrt(mean(test_baseball$WLR-predict(baseball_2,test_baseball))^2)
+```
+
+Mean Square Error for baseball_2 = .0087
+
+# Data Exploration
+```{r}
+hist(baseball$WLR)
+pairs(baseball)
+mean(baseball$WLR);sd(baseball$WLR);range(baseball$WLR)
+```
+
