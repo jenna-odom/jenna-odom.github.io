@@ -3,7 +3,7 @@
 Hi, my name is Jenna and I'm a third year Data Science student at the University of Georgia. I am interested in machine learning and automation. Fortunately, I have had the opportunity to gain exposure to machine learning techniques through my coursework. I am always enthusiatic about learning more!
 
 ### Past Projects 
--  [Understanding Traffic - Data Science 1 Course Project](/Past Projects/Understanding Traffic/Understanding Traffic.pptx-3.pdf)
+-  [Understanding Traffic - Data Science 1 Course Project](./Past Projects/Understanding Traffic/Understanding Traffic.pptx-3.pdf)
 -  [Applied Linear Regression Course Project]()
 -  [Arch Policy Institute (2022-2023)]()
 
