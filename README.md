@@ -4,7 +4,7 @@ Hi, my name is Jenna and I'm a third year Data Science student at the University
 
 ### Past Projects 
 -  [Understanding Traffic - Data Science 1 Course Project](Past Projects/Understanding Traffic/Understanding Traffic.pptx-3.pdf)
--  [Applied Linear Regression Course Project](Past Projects/Applied Linear Regression Final Project)
+-  [Applied Linear Regression Course Project]()
 -  [Arch Policy Institute (2022-2023)]()
 
 ### Upcoming Projects
