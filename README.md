@@ -12,12 +12,7 @@ Hi, my name is Jenna and I'm a third year Data Science student at the University
 ### Upcoming and Ongoing Projects
 [Focus Foliage](https://github.com/amyhuang190/FocusFoliage)
 
-### Tools for Disseminating Information 
--  [Past Initiatives]()
--  [Bulletin Boards]()
--  [Event summaries]()
-
-In addition to the information on this Github Page, access to my previous project experience is available on my linkedIn Page which is located [here](www.linkedin.com/in/jennaodom).
+In addition to the information on this Github Page, access to my previous project experience is available on my linkedIn Page which is located www.linkedin.com/in/jennaodom.
 
 Thank you for your interest in my work,
 
