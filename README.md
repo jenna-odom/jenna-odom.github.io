@@ -13,5 +13,6 @@ Hi, my name is Jenna and I'm a third year Data Science student at the University
 In addition to the information on this Github Page, access to my previous project experience is available on my linkedIn Page which is located www.linkedin.com/in/jennaodom.
 
 Thank you for your interest in my work,
+
 Jenna Odom
 jenna.odom@uga.edu
