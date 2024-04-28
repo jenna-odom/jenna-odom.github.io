@@ -15,4 +15,5 @@ In addition to the information on this Github Page, access to my previous projec
 Thank you for your interest in my work,
 
 Jenna Odom
+
 jenna.odom@uga.edu
