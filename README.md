@@ -1,6 +1,6 @@
 ## Welcome to Jenna Odom's Data Science Portfolio!
 
-Hi, my name is Jenna and I'm a fourth year Data Science student at the University of Georgia. I am interested in machine learning, automation, artificial intelligence, and cybersecurity. I am always enthusiatic about learning more!
+Hi, my name is Jenna and I'm a fourth year Data Science student at the University of Georgia. I am interested in business data analytics, machine learning, automation, artificial intelligence, and cybersecurity. I am always enthusiatic about learning more!
 
 ### Past Projects 
 -  [Understanding Traffic - Data Science 1 Course Project](https://github.com/jenna-odom/jenna-odom.github.io/tree/47657528c26380dde048e1b9ea193c2c3cbe0048/Past%20Projects/Understanding%20Traffic)
