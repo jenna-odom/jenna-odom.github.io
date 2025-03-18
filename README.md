@@ -8,8 +8,8 @@ Hi, my name is Jenna and I'm a fourth year Data Science student at the Universit
 -  [Burden of Hostile Architecture: In Defense of Equitable Bus Stops (2022-2023)](https://www.archpolicyinstitute.org/2023-journal)
 
 ### Upcoming and Ongoing Projects
-[Focus Foliage](https://github.com/amyhuang190/FocusFoliage)
-
+- [Focus Foliage](https://github.com/amyhuang190/FocusFoliage)
+- Emergency Alerts with GraphRAG
 In addition to the information on this Github Page, access to my previous project experience is available on my linkedIn Page which is located www.linkedin.com/in/jennaodom.
 
 Thank you for your interest in my work,
